@@ -4,7 +4,8 @@
    Ch04 sẽ chép các token này sang @theme của Tailwind.
    ========================================================================== */
 
-:root {
+:root
+{
   /* Bảng màu gốc của dự án (cho sẵn) */
   --palette-blue-900: #001d45;   /* tối */
   --palette-blue-700: #003f87;   /* chính */
@@ -90,12 +91,49 @@
      --shadow-md: 0 4px 12px rgb(0 29 69 / 0.1);
      --shadow-lg: 0 12px 24px rgb(0 29 69 / 0.16);
 
+     --container-max: 72rem; /* 1152px */
+     --container-narrow: 44rem; /* 704px */
+     --duration-fast: 150ms;
+     --duration-normal: 250ms;
+     --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
 
   /* TODO(ch2-T1): Ghi chú breakpoint (var() KHÔNG dùng được trong @media, chỉ để tra cứu):
        --breakpoint-sm: 40rem;  (640px)   --breakpoint-lg: 64rem;  (1024px) */
 
+      --breakpoint-sm: 40rem; /* 640px */
+      --breakpoint-lg: 64rem; /* 1024px */
+
   /* TODO(ch2-T1): color-scheme: light dark; */
+
+      color-scheme: light dark;
 }
 
 /* TODO(ch2-T1): Dark mode — trong @media (prefers-color-scheme: dark) { :root { … } }
    chỉ đổi giá trị các token --color-* (nền tối, chữ sáng, primary sáng hơn để đủ tương phản). */
+
+   @media (prefers-color-scheme: dark)
+   {
+      :root
+      {
+         --color-primary: var(--palette-blue-300);
+         --color-primary-hover: #a9cbff;
+         --color-on-primary: var(--palette-blue-900);
+         --color-accent-strong: var(--palette-cyan-500);
+         --color-bg: #000f26;
+         --color-surface: var(--palette-blue-900);
+         --color-surface-muted: #0a2a57;
+         --color-text: #e6eef8;
+         --color-text-muted: #a8b6cc;
+         --color-border: #1f3d66;
+         --color-link: var(--palette-blue-300);
+         --color-warning: #fdba74;
+         --color-warning-bg: #3b1d0a;
+         --color-danger: #f87171;
+         --color-success: #4ade80;
+         --color-header-bg: #000a1a;
+
+         --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+         --shadow-md: 0 4px 12px rgb(0 0 0 / 0.45);
+         --shadow-lg: 0 12px 28px rgb(0 0 0 / 0.55);
+      }
+   }
