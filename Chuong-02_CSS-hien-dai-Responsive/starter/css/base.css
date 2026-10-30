@@ -5,13 +5,56 @@
 
 /* TODO(ch2-T2): box-sizing: border-box cho *, *::before, *::after */
 
+*,
+*::before,
+*::after
+{
+   box-sizing: border-box;
+}
+
 /* TODO(ch2-T2): Bỏ margin mặc định bằng :where(body, h1, h2, h3, p, ul, ol, dl, dd, figure, fieldset)
    (:where() có specificity 0 nên các lớp sau ghi đè dễ dàng) */
+
+:where(boby, h1, h2, h3, p, ul, ol, dl, dd, figure, fieldset)
+{
+   margin: 0;
+}
 
 /* TODO(ch2-T2): body — font, cỡ chữ, line-height, màu chữ, màu nền lấy từ token;
    display: flex + flex-direction: column, và main { flex: 1 } để footer luôn ở đáy */
 
+body
+{
+   min-block-size: 100vh;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+
+  display: flex;
+  flex-direction: column;
+}
+
+main
+{
+   flex: 1;
+}
+
 /* TODO(ch2-T2): Tiêu đề h1/h2/h3 dùng thang chữ token; img/svg { display: block; max-inline-size: 100%; block-size: auto } */
+
+:is(h1, h2, h3)
+{
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-bold);
+  text-wrap: balance; /* chia dòng tiêu đề cho cân */
+}
+
+h1 { font-size: var(--text-3xl); }
+h2 { font-size: var(--text-2xl); }
+h3 { font-size: var(--text-xl); }
+
+p { text-wrap: pretty; } /* Tối ưu ngắt dòng cho đoạn văn bản */
 
 /* TODO(ch2-T2): input, button, select, textarea kế thừa font (font: inherit) */
 
