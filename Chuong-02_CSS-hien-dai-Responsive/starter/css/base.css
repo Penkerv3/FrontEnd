@@ -56,8 +56,55 @@ h3 { font-size: var(--text-xl); }
 
 p { text-wrap: pretty; } /* Tối ưu ngắt dòng cho đoạn văn bản */
 
+img,
+svg
+{
+   display: block;
+   max-inline-size: 100%;
+   block-size: auto;
+}
+
 /* TODO(ch2-T2): input, button, select, textarea kế thừa font (font: inherit) */
+
+:where(input, button, select, textarea)
+{
+  font: inherit;
+  color: inherit;
+}
+
+abbr[title]
+{
+  text-decoration: none;
+  color: var(--color-danger);
+}
+
+small
+{
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
 
 /* TODO(ch2-T2): :focus-visible — outline 3px màu --color-focus, outline-offset 2px */
 
+:focus-visible
+{
+   outline: 3px solid var(--color-focus);
+   outline-offset: 2px;
+}
+
 /* TODO(ch2-T2): @media (prefers-reduced-motion: reduce) — tắt animation/transition, scroll-behavior: auto */
+
+@media (prefers-reduced-motion: reduce)
+{
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
