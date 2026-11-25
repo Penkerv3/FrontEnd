@@ -9,8 +9,8 @@ export class ApiError extends Error
   {
     super(message);
     this.name = 'ApiError';
-    this.status = status;
-    this.fieldErrors = fieldErrors;
+    this.status = status; // 0 = không kết nối được server
+    this.fieldErrors = fieldErrors; // vd. { email: ['Email không hợp lệ.'] }
   }
 }
 
@@ -20,6 +20,14 @@ export class ApiError extends Error
  */
 async function request(path, { method = 'GET', body, signal } = {})
 {
+  // TODO(ch3-T2): cài đặt request()
+  // 1. await fetch(`${API_URL}${path}`, { method, signal, headers, body }) — có body thì
+  //    gửi JSON.stringify(body) kèm header 'Content-Type': 'application/json'.
+  // 2. fetch ném lỗi (mất mạng, tắt mock API): nếu error.name === 'AbortError' thì ném lại nguyên trạng,
+  //    ngược lại ném new ApiError(0, 'Không kết nối được máy chủ…').
+  // 3. !response.ok: đọc JSON ProblemDetails { title, detail, errors } rồi ném
+  //    new ApiError(response.status, detail ?? title, errors).
+  // 4. Thành công: trả response.json() (204 thì trả null).
   let response;
   try
   {
@@ -32,25 +40,30 @@ async function request(path, { method = 'GET', body, signal } = {})
   }
   catch (error)
   {
+    // Request bị huỷ bằng AbortController: ném lại nguyên trạng để nơi gọi bỏ qua
     if (error.name === 'AbortError')
     {
       throw error;
     }
+    // fetch chỉ ném lỗi khi không tới được server (tắt mock API, mất mạng, bị chặn CORS)
     throw new ApiError(0, 'Không kết nối được máy chủ. Kiểm tra mock API đã chạy (npm run api) chưa.');
   }
 
   if (!response.ok)
   {
+    // Server trả lỗi dạng ProblemDetails: { title, status, detail, errors }
     const problem = await response.json().catch(() => ({}));
     throw new ApiError(response.status, problem.detail ?? problem.title ?? `Lỗi ${response.status}`, problem.errors);
   }
 
+  // 204 No Content: không có thân để đọc
   return response.status === 204 ? null : response.json();
 }
 
 /** Bỏ các tham số rỗng để URL gọn: { q: '', clubId: 'x' } → "?clubId=x" */
 function toQueryString(params)
 {
+  // TODO(ch3-T2): dùng URLSearchParams, bỏ giá trị undefined/null/'' ; không có tham số nào thì trả ''
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params))
   {
@@ -72,6 +85,7 @@ export function getEvents({ q, clubId, page = 1, pageSize = 50 } = {}, signal)
 /** GET /api/events/{id} → EventDto (404 nếu không có) */
 export function getEvent(id, signal)
 {
+  // encodeURIComponent: id lấy từ URL do người dùng gõ, không tin được
   return request(`/api/events/${encodeURIComponent(id)}`, { signal });
 }
 

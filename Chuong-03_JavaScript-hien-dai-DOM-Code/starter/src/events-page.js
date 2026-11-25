@@ -3,6 +3,8 @@
 import { getClubs, getEvents } from './api.js';
 import { el, renderEventList, renderStatus } from './render.js';
 import { debounce } from './utils/debounce.js';
+// TODO(ch3-T4): import thêm el (từ './render.js') và debounce (từ './utils/debounce.js'),
+// rồi khai báo hằng số thời gian chờ gõ: const SEARCH_DELAY_MS = 300;
 
 const SEARCH_DELAY_MS = 300;
 
@@ -22,6 +24,7 @@ let currentController = null;
 
 function readFiltersFromUrl()
 {
+  // TODO(ch3-T4): đọc q và clubId từ new URLSearchParams(window.location.search); thiếu thì ''
   const params = new URLSearchParams(window.location.search);
   return { q: params.get('q') ?? '', clubId: params.get('clubId') ?? '' };
 }
@@ -33,6 +36,8 @@ function readFiltersFromForm()
 
 function writeFiltersToUrl({ q, clubId })
 {
+  // TODO(ch3-T4): ghi q, clubId (bỏ giá trị rỗng) lên URL bằng window.history.replaceState
+  // — đổi URL mà không tải lại trang.
   const params = new URLSearchParams();
   if (q)
   {
@@ -43,6 +48,7 @@ function writeFiltersToUrl({ q, clubId })
     params.set('clubId', clubId);
   }
   const query = params.toString();
+  // replaceState: đổi URL mà không tải lại trang và không thêm một mục vào lịch sử Back
   window.history.replaceState(null, '', query ? `?${query}` : window.location.pathname);
 }
 
@@ -56,11 +62,13 @@ async function loadClubs()
     for (const club of clubs)
     {
       clubNames.set(club.id, club.name);
+      // TODO(ch3-T4): thêm <option value={club.id}>{club.name}</option> vào clubSelect (dùng el())
       clubSelect.append(el('option', { text: club.name, attrs: { value: club.id } }));
     }
   }
   catch (error)
   {
+    // Thiếu danh sách CLB chỉ làm mất bộ lọc, trang vẫn xem được sự kiện
     console.warn('Không tải được danh sách CLB:', error.message);
   }
 }
@@ -85,6 +93,15 @@ async function loadEvents()
   const filters = readFiltersFromForm();
   writeFiltersToUrl(filters);
 
+  // TODO(ch3-T4): cài đặt tải sự kiện
+  // 1. Huỷ request cũ (AbortController đang chạy → abort()), tạo controller mới.
+  // 2. Hiện trạng thái đang tải: renderStatus(eventList, 'loading', 'Đang tải sự kiện…').
+  // 3. const page = await getEvents(filters, controller.signal)
+  //    - page.items rỗng → renderStatus(eventList, 'empty', …), xoá resultCount
+  //    - có dữ liệu → resultCount "Tìm thấy {page.totalCount} sự kiện" + renderEventList(eventList, page.items, clubNames)
+  // 4. catch: bỏ qua AbortError; lỗi khác → renderStatus(eventList, 'error', error.message, { label: 'Thử lại', onClick: loadEvents })
+  // Gõ nhanh "a" rồi "ab": request "a" có thể về SAU request "ab" và ghi đè kết quả đúng.
+  // Huỷ request cũ trước khi gửi request mới để tránh chuyện đó.
   currentController?.abort();
   const controller = new AbortController();
   currentController = controller;
@@ -102,7 +119,7 @@ async function loadEvents()
   {
     if (error.name === 'AbortError')
     {
-      return;
+      return; // request cũ bị huỷ — request mới sẽ vẽ kết quả
     }
     renderStatus(eventList, 'error', error.message, { label: 'Thử lại', onClick: loadEvents });
   }
@@ -117,13 +134,16 @@ async function loadEvents()
 
 // ---- Gắn sự kiện ----
 
+// TODO(ch3-T4): ô tìm kiếm gọi loadEvents sau khi ngừng gõ SEARCH_DELAY_MS ms:
+//   searchInput.addEventListener('input', debounce(loadEvents, SEARCH_DELAY_MS));
+// TODO(ch3-T4): đổi CLB (sự kiện 'change' của clubSelect) → loadEvents ngay.
 const loadEventsAfterTyping = debounce(loadEvents, SEARCH_DELAY_MS);
 
 searchInput.addEventListener('input', loadEventsAfterTyping);
 clubSelect.addEventListener('change', loadEvents);
 filterForm.addEventListener('submit', (event) =>
 {
-  event.preventDefault();
+  event.preventDefault(); // Enter trong ô tìm kiếm: lọc ngay, không tải lại trang
   loadEvents();
 });
 
@@ -131,7 +151,7 @@ async function init()
 {
   const filters = readFiltersFromUrl();
   searchInput.value = filters.q;
-  await loadClubs();
+  await loadClubs(); // cần có <option> CLB thì mới chọn lại được clubId từ URL
   clubSelect.value = filters.clubId;
   await loadEvents();
 }
